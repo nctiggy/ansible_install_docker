@@ -1,0 +1,45 @@
+- name: "Uninstall old versions"
+  yum:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+    - docker
+    - docker-client
+    - docker-client-latest
+    - docker-common
+    - docker-latest
+    - docker-latest-logrotate
+    - docker-logrotate
+    - docker-engine
+
+- name: "Install Pre-reqs"
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - yum-utils
+    - device-mapper-persistent-data
+    - lvm2
+
+- name: "Add T-Mo Docker repository"
+  yum_repository:
+    name: tmobile-docker-repo
+    description: T-Mobile's Docker Repo
+    baseurl: file:///nfs/infra/linux_x86/sw/yum/thirdparty/docker/RHEL7/
+    gpgcheck: no
+    enabled: yes
+
+- name: "Install Docker-CE"
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
+
+- name: Make sure the docker service is running
+  systemd:
+    state: started
+    name: docker
+    enable: yes
